@@ -1,10 +1,10 @@
 package com.epam.spring.restdemo.controllers;
 
 import com.epam.spring.restdemo.domain.Student;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import com.epam.spring.restdemo.exceptions.StudentNotFoundException;
+import org.springframework.web.bind.annotation.*;
 
+import javax.annotation.PostConstruct;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -12,14 +12,27 @@ import java.util.List;
 @RequestMapping("/api")
 public class StudentRestController {
 
-    @GetMapping("/students")
-    public List<Student> getStudents(){
+    private List<Student> students;
 
-        List<Student> students = new ArrayList<>();
-
+    @PostConstruct
+    public void loadData() {
+        students = new ArrayList<>();
         students.add(new Student("Stas", "Ivanov"));
         students.add(new Student("Alina", "Burdukova"));
+    }
 
+    @GetMapping("/students")
+    public List<Student> getStudents() {
         return students;
+    }
+
+    @GetMapping("/students/{studentId}")
+    public Student getStudent(@PathVariable int studentId) {
+
+        if (studentId >= students.size() || studentId < 0) {
+            throw new StudentNotFoundException("Student ID not found " + studentId);
+        }
+
+        return students.get(studentId);
     }
 }
